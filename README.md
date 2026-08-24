@@ -254,7 +254,13 @@ Use the table below to choose the right cores based on your CPU thread count:
 ### View Current Preferences & Exclusions:
 ```powershell
 # View active exclusions and CPU limits
-Get-MpPreference | Select-Object -Property ExclusionPath, ExclusionProcess, ScanAvgCPULoadFactor
+$mp = Get-MpPreference
+Write-Host "CPU Limit: $($mp.ScanAvgCPULoadFactor)%`n"
+Write-Host "--- Excluded Processes ---" -ForegroundColor Cyan
+$mp.ExclusionProcess | ForEach-Object { Write-Host " • $_" }
+Write-Host "`n--- Excluded Paths ---" -ForegroundColor Cyan
+$mp.ExclusionPath | ForEach-Object { Write-Host " • $_" }
+
 ```
 
 ### Revert Defender Settings to Default:
