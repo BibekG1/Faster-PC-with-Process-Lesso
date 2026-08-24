@@ -1,10 +1,9 @@
 
 ```markdown
 # 🚀 Optimization Guide: Make Your PC Faster with Process Lasso & Tame Windows Defender
-
+```
 A minimalist, high-efficiency guide to optimizing your CPU performance, eliminating system micro-stutters, maximizing responsiveness, and taming Windows Defender (`Antimalware Service Executable` / `MsMpEng.exe`) using **Process Lasso** and built-in Windows PowerShell controls.
 
-```
 
 <br>
 
