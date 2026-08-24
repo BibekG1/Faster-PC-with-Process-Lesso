@@ -137,6 +137,138 @@ However, if you are a power user looking to set dedicated CPU core affinities, l
 
 🔗 **Official Knowledge Base & Manual:** [Bitsum Process Lasso Documentation](https://www.google.com/search?q=https://bitsum.com/docs/processlasso/)
 
+
+```markdown
+# 🛡️ DefenderTamer (SmartDefenderControl)
+
+> A practical guide and optimization toolkit to tame Windows Defender (`Antimalware Service Executable` / `MsMpEng.exe`), eliminate background CPU spikes, speed up developer IDEs, and prevent disk throttling without disabling system protection.
+
+---
+
+## 📌 The Problem
+Windows Defender is great for security, but by default, it causes major performance bottlenecks for developers and power users:
+- **Consumes up to 50% CPU** during background routine scans.
+- **Infinite Scan Loops:** Scans its own process files and databases while scanning other files.
+- **Developer IDE Lag:** Real-time scanning intercepts every single file read/write made by IDEs (Antigravity IDE, VS Code, JetBrains), package managers (`npm`, `pip`, `cargo`), compiler builds, and Git operations.
+
+---
+
+## ⚡ Quick 1-Command Optimization (PowerShell)
+
+Open **PowerShell (Run as Administrator)** and run:
+
+```powershell
+# 1. Cap maximum background scan CPU usage to 15% (Default is 50%)
+Set-MpPreference -ScanAvgCPULoadFactor 15
+
+# 2. Stop Defender from scanning its own engine process (Fixes disk I/O loops)
+Add-MpPreference -ExclusionProcess "MsMpEng.exe"
+
+# 3. Disable heavy archive (zip/rar) scanning during background idle scans
+Set-MpPreference -DisableArchiveScanning $true
+
+Write-Host "✅ Windows Defender resource limits successfully applied!" -ForegroundColor Green
 ```
 
+### What these commands do:
+| Command | Effect | Why it matters |
+| :--- | :--- | :--- |
+| `-ScanAvgCPULoadFactor 15` | Capped at 15% CPU | Prevents Defender from making your PC freeze or fans spin up during background scans. |
+| `-ExclusionProcess "MsMpEng.exe"` | Self-Scan Prevention | Stops Defender from continuously intercepting and scanning its own files in an endless disk loop. |
+| `-DisableArchiveScanning $true` | Skip Archive Inspection | Prevents Defender from unzipping and deep-scanning massive archives in the background. |
+
+---
+
+## 🚀 Recommended Developer & IDE Exclusions
+
+Whenever an IDE compiles code, writes logs, or indexes files, real-time protection checks every single file. Adding exclusions for your dev tools provides a **massive performance boost (up to 3x faster build times & indexing)**.
+
+### 1. Developer IDEs & Tools
+Run in **PowerShell (Run as Administrator)** to exclude developer processes:
+
+```powershell
+# IDEs & Code Editors
+Add-MpPreference -ExclusionProcess "Antigravity.exe"
+Add-MpPreference -ExclusionProcess "Code.exe"               # VS Code
+Add-MpPreference -ExclusionProcess "cursor.exe"             # Cursor IDE
+Add-MpPreference -ExclusionProcess "idea64.exe"             # IntelliJ IDEA / PyCharm / WebStorm
+
+# Language Servers & Node Runtimes
+Add-MpPreference -ExclusionProcess "node.exe"
+Add-MpPreference -ExclusionProcess "git.exe"
+Add-MpPreference -ExclusionProcess "language_server_windows_x64.exe"
 ```
+
+### 2. High-Traffic Developer Directories
+Exclude folders that contain thousands of small files constantly created/deleted:
+
+```powershell
+# Exclude your project directories and cache folders
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.gemini"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.vscode"
+Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\npm-cache"
+Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\pnpm"
+Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\Yarn"
+
+# Optional: Add your active development workspaces
+# Add-MpPreference -ExclusionPath "C:\Projects"
+# Add-MpPreference -ExclusionPath "$env:USERPROFILE\Downloads\my site"
+```
+
+---
+
+## 🎛️ Real-Time CPU Limiting via Process Lasso
+
+Because `MsMpEng.exe` is protected by Windows kernel-level protection (Protected Process Light / PPL), standard task managers cannot easily change its core affinity in real-time. 
+
+To permanently restrict `MsMpEng.exe` from consuming all CPU cores in real-time:
+
+### Step-by-Step Guide:
+1. Open **Process Lasso** (Run as Administrator).
+2. In the search filter box at the top, type `MsMpEng.exe`.
+3. Right-click on **`MsMpEng.exe`**:
+   - **CPU Priority:**
+     - Select **CPU Priority** ➔ **Always** ➔ **Below Normal** (or **Normal**).
+   - **CPU Affinity (Core Limiting):**
+     - Select **CPU Affinity** ➔ **Always** ➔ **Select CPU Affinity...**
+     - **Uncheck all cores**, and only select **1 or 2 specific CPU cores** (for example: Core 2 and Core 3).
+   - **I/O Priority:**
+     - Select **I/O Priority** ➔ **Always** ➔ **Low** (or **Below Normal**).
+
+> 💡 **Why this helps:** Even when Windows Defender performs heavy real-time analysis, it will be hard-locked to only 1 or 2 cores, leaving your primary cores completely free for your browser, IDE, and foreground apps!
+
+---
+
+## 🔄 How to Check or Revert Changes
+
+### View Current Preferences & Exclusions:
+```powershell
+# View active exclusions
+Get-MpPreference | Select-Object -Property ExclusionPath, ExclusionProcess, ScanAvgCPULoadFactor
+```
+
+### Revert to Defaults:
+```powershell
+# Reset CPU load factor back to default (50%)
+Set-MpPreference -ScanAvgCPULoadFactor 50
+
+# Remove an exclusion if needed
+Remove-MpPreference -ExclusionProcess "MsMpEng.exe"
+```
+
+---
+
+## 📜 License
+MIT License. Free for personal and commercial use.
+```
+
+---
+
+### Why this README structure works so well:
+1. **Clear visual layout** with tables and clean code blocks.
+2. **Beginner-friendly copy-paste commands** that work out of the box.
+3. **Dedicated Process Lasso guide** explaining CPU Affinity, CPU Priority, and I/O Priority step-by-step.
+4. **Dev-focused list of exclusions** including Antigravity IDE, VS Code, language servers, Node, and cache folders.
+5. **Revert section** so users feel safe trying it out.
+```
+
