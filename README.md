@@ -272,6 +272,45 @@ Set-MpPreference -ScanAvgCPULoadFactor 50
 Remove-MpPreference -ExclusionProcess "MsMpEng.exe"
 ```
 
+### How to Remove a specific process exclusion:
+```powershell
+Remove-MpPreference -ExclusionProcess "node.exe"
+```
+
+### How to Remove a specific folder path exclusion:
+```powershell
+Remove-MpPreference -ExclusionPath "$env:LOCALAPPDATA\npm-cache"
+```
+
+### How to Remove ALL Exclusions & Reset Defender :
+```powershell
+$mp = Get-MpPreference
+
+# 1. Clear All Process Exclusions
+if ($mp.ExclusionProcess) {
+    $mp.ExclusionProcess | ForEach-Object {
+        Remove-MpPreference -ExclusionProcess $_
+        Write-Host "🗑️ Removed Process: $_" -ForegroundColor Yellow
+    }
+}
+
+# 2. Clear All Path Exclusions
+if ($mp.ExclusionPath) {
+    $mp.ExclusionPath | ForEach-Object {
+        Remove-MpPreference -ExclusionPath $_
+        Write-Host "🗑️ Removed Path: $_" -ForegroundColor Yellow
+    }
+}
+
+# 3. Reset Background Scan CPU Limit to Default (50%)
+Set-MpPreference -ScanAvgCPULoadFactor 50
+
+# 4. Re-enable Archive Scanning
+Set-MpPreference -DisableArchiveScanning $false
+
+Write-Host "`n✅ All Defender exclusions cleared & settings restored to factory defaults!" -ForegroundColor Green
+
+```
 ---
 
 <br>
