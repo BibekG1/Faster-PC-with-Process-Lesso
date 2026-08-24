@@ -137,6 +137,9 @@ However, if you are a power user looking to set dedicated CPU core affinities, l
 
 🔗 **Official Knowledge Base & Manual:** [Bitsum Process Lasso Documentation](https://www.google.com/search?q=https://bitsum.com/docs/processlasso/)
 
+<br>
+<br>
+<br>
 
 ```markdown
 # 🛡️ DefenderTamer (SmartDefenderControl)
